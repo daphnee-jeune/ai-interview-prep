@@ -8,6 +8,8 @@ import { Form } from "@/components/ui/form";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
+import FormField from "./FormField";
+import { useRouter } from "next/navigation";
 
 const authFormSchema = (type: FormType) => {
   return z.object({
@@ -17,6 +19,8 @@ const authFormSchema = (type: FormType) => {
   });
 };
 const AuthForm = ({ type }: { type: FormType }) => {
+  const router = useRouter();
+
   const formSchema = authFormSchema(type);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -29,11 +33,14 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("HERE");
     try {
       if (type === "sign-up") {
-        console.log("SIGN UP", values);
-      } else if("sign-in"){
-        console.log("SIGN IN", values)
+        toast.success("Your account was created successfully! Please sign in.");
+        router.push("/sign-in");
+      } else {
+        toast.success("You're in!");
+        router.push("/");
       }
     } catch (err) {
       console.log(err);
@@ -54,9 +61,28 @@ const AuthForm = ({ type }: { type: FormType }) => {
             onSubmit={form.handleSubmit(onSubmit)}
             className="w-full space-y-6 mt-4 form"
           >
-            {!isSignedIn && <p>Name</p>}
-            <p>Email</p>
-            <p>Password</p>
+            {!isSignedIn && (
+              <FormField
+                control={form.control}
+                name="ame"
+                label="Name"
+                placeholder="Your name"
+              />
+            )}
+            <FormField
+              control={form.control}
+              name="email"
+              label="Email"
+              placeholder="Your email address"
+              type="email"
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              label="Password"
+              placeholder="Enter your password"
+              type="password"
+            />
             <Button type="submit" className="btn">
               {isSignedIn ? "Sign in" : "Create an account"}
             </Button>
@@ -65,7 +91,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
         <p className="text-center">
           {isSignedIn ? "No account yet?" : "Have an account already?"}{" "}
           <Link
-            href={!isSignedIn ? "/sign-in" : "sign-up"}
+            href={!isSignedIn ? "/sign-in" : "/sign-up"}
             className="font-bold text-user-primary ml-1"
           >
             {!isSignedIn ? "Sign in" : "Sign up"}
